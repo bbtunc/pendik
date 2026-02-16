@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendik Arkatlı Evler - Uzman Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .filters {
+            padding: 30px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .filter-select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .table-section {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .price {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 900px;
+            margin: 50px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 30px;
+            cursor: pointer;
+            color: white;
+            background: none;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .detail-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .sorun-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff3cd;
+            border-radius: 10px;
+            border-left: 5px solid #ffc107;
+        }
+
+        .sorun-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .sorun-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ffe69c;
+        }
+
+        .sorun-list li:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+
+        .view-btn:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Pendik Arkatlı Evler</h1>
+            <p>Uzman Satış Dashboard - 178 Daire</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="Daire ara... (örn: A1-1, B-4, D-73)">
+                <button class="search-btn" onclick="searchApartment()">🔍 Ara</button>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <h3>Toplam Daire</h3>
+                <div class="value" id="totalApartments">178</div>
+            </div>
+            <div class="stat-card">
+                <h3>Toplam Değer</h3>
+                <div class="value" id="totalValue">1.95 Milyar TL</div>
+            </div>
+            <div class="stat-card">
+                <h3>Ortalama Fiyat</h3>
+                <div class="value" id="avgPrice">10.96 M TL</div>
+            </div>
+            <div class="stat-card">
+                <h3>Ortalama Kira</h3>
+                <div class="value" id="avgRent">61.400 TL</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <h3 style="margin-bottom: 15px; color: #667eea;">🔍 Filtreler</h3>
+            <div class="filter-group">
+                <select class="filter-select" id="blockFilter" onchange="applyFilters()">
+                    <option value="">Tüm Bloklar</option>
+                    <option value="A1">A1 Blok</option>
+                    <option value="A2">A2 Blok</option>
+                    <option value="B">B Blok</option>
+                    <option value="C1">C1 Blok</option>
+                    <option value="C2">C2 Blok</option>
+                    <option value="C3">C3 Blok</option>
+                    <option value="C4">C4 Blok</option>
+                    <option value="D">D Blok</option>
+                </select>
+                <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                    <option value="">Tüm Tipler</option>
+                    <option value="1+1">1+1</option>
+                    <option value="2+1">2+1</option>
+                    <option value="3+1">3+1</option>
+                    <option value="4+1">4+1</option>
+                </select>
+                <select class="filter-select" id="floorFilter" onchange="applyFilters()">
+                    <option value="">Tüm Katlar</option>
+                    <option value="ZEMİN">Zemin Kat</option>
+                    <option value="1.NORMAL">1. Kat</option>
+                    <option value="4.NORMAL">4. Kat</option>
+                    <option value="5.NORMAL">5. Kat</option>
+                    <option value="6.NORMAL">6. Kat</option>
+                    <option value="7.NORMAL">7. Kat</option>
+                    <option value="8.NORMAL">8. Kat</option>
+                    <option value="9.NORMAL">9. Kat</option>
+                    <option value="10.NORMAL">10. Kat</option>
+                    <option value="11.NORMAL">11. Kat</option>
+                    <option value="12.NORMAL">12. Kat</option>
+                    <option value="13.NORMAL">13. Kat</option>
+                </select>
+                <select class="filter-select" id="priceFilter" onchange="applyFilters()">
+                    <option value="">Fiyat Aralığı</option>
+                    <option value="0-8000000">8M TL'ye kadar</option>
+                    <option value="8000000-12000000">8M - 12M TL</option>
+                    <option value="12000000-16000000">12M - 16M TL</option>
+                    <option value="16000000-99999999">16M TL üzeri</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <table id="apartmentTable">
+                <thead>
+                    <tr>
+                        <th>Sıra</th>
+                        <th>Daire</th>
+                        <th>Blok</th>
+                        <th>Kat</th>
+                        <th>Tip</th>
+                        <th>m²</th>
+                        <th>Cephe</th>
+                        <th>Fiyat</th>
+                        <th>Kira</th>
+                        <th>Detay</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                ❌ Sonuç bulunamadı
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Daire Detayları</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apartments = [
+            {no: 1, daire: "A1-1", blok: "A1", kat: "ZEMİN KAT", tip: "2+1 TİP E BAHÇE", cephe: "G-B VADİ-PEYZAJ", bahce: 39.99, m2: 137.23, birim: 95715.22, fiyat: 13135000, kira: 73000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"]},
+            {no: 2, daire: "A1-2", blok: "A1", kat: "ZEMİN KAT", tip: "2+1 TİP E BAHÇE", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 39.99, m2: 137.23, birim: 93704.00, fiyat: 12859000, kira: 71400, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"]},
+            {no: 3, daire: "A1-5", blok: "A1", kat: "ZEMİN KAT", tip: "2+1 DUBLEKS", cephe: "G VADİ", bahce: 8.14, m2: 119.93, birim: 87175.85, fiyat: 10455000, kira: 59700, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"]},
+            {no: 4, daire: "A1-6", blok: "A1", kat: "1.NORMAL KAT", tip: "2+1 TİP E", cephe: "G-B VADİ-PEYZAJ", bahce: 0, m2: 137.22, birim: 81256.38, fiyat: 11150000, kira: 61900, sorunlar: []},
+            {no: 5, daire: "A1-36", blok: "A1", kat: "7.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 146.6, birim: 81521.15, fiyat: 11951000, kira: 66400, sorunlar: []},
+            {no: 6, daire: "A1-40", blok: "A1", kat: "8.NORMAL KAT", tip: "3+1 TİP A", cephe: "G-B VADİ-PEYZAJ", bahce: 0, m2: 146.6, birim: 83206.00, fiyat: 12198000, kira: 67800, sorunlar: []},
+            {no: 7, daire: "A1-41", blok: "A1", kat: "8.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 146.6, birim: 81507.50, fiyat: 11949000, kira: 66400, sorunlar: []},
+            {no: 8, daire: "A1-42", blok: "A1", kat: "8.NORMAL KAT", tip: "3+1 TİP B", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 137.46, birim: 82074.79, fiyat: 11282000, kira: 62700, sorunlar: []},
+            {no: 9, daire: "A1-43", blok: "A1", kat: "8.NORMAL KAT", tip: "3+1 TİP B", cephe: "G-D VADİ-VADİ", bahce: 0, m2: 157.78, birim: 83629.10, fiyat: 13195000, kira: 73300, sorunlar: []},
+            {no: 10, daire: "A1-45", blok: "A1", kat: "9.NORMAL KAT", tip: "3+1 TİP A", cephe: "G-B VADİ-PEYZAJ", bahce: 0, m2: 146.6, birim: 83983.63, fiyat: 12312000, kira: 68400, sorunlar: []},
+            {no: 11, daire: "A1-46", blok: "A1", kat: "9.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 146.6, birim: 82285.13, fiyat: 12063000, kira: 67000, sorunlar: []},
+            {no: 12, daire: "A1-50", blok: "A1", kat: "10.NORMAL KAT", tip: "3+1 TİP A", cephe: "G-B VADİ-PEYZAJ", bahce: 0, m2: 146.6, birim: 84761.26, fiyat: 12426000, kira: 69000, sorunlar: []},
+            {no: 13, daire: "A1-51", blok: "A1", kat: "10.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 146.6, birim: 83062.76, fiyat: 12177000, kira: 67700, sorunlar: []},
+            {no: 14, daire: "A1-52", blok: "A1", kat: "10.NORMAL KAT", tip: "3+1 TİP B", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 157.78, birim: 83629.10, fiyat: 13195000, kira: 73300, sorunlar: []},
+            {no: 15, daire: "A1-55", blok: "A1", kat: "11.NORMAL KAT", tip: "3+1 TİP A", cephe: "G-B VADİ-PEYZAJ", bahce: 0, m2: 146.6, birim: 84372.44, fiyat: 12369000, kira: 68700, sorunlar: []},
+            {no: 16, daire: "A1-56", blok: "A1", kat: "11.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 146.6, birim: 82673.94, fiyat: 12120000, kira: 67300, sorunlar: []},
+            {no: 17, daire: "A1-58", blok: "A1", kat: "11.NORMAL KAT", tip: "3+1 TİP B", cephe: "G-D VADİ-VADİ", bahce: 0, m2: 157.78, birim: 84801.62, fiyat: 13380000, kira: 74300, sorunlar: []},
+            {no: 18, daire: "A1-60", blok: "A1", kat: "12.NORMAL KAT", tip: "4+1 TİP A", cephe: "K-G-B VADİ-ŞEHİR-ŞEHİR", bahce: 0, m2: 313.97, birim: 81896.36, fiyat: 25713000, kira: 139000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "31.07.2025"},
+            {no: 19, daire: "A1-61", blok: "A1", kat: "12.NORMAL KAT", tip: "2+1 TİP G", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 137.63, birim: 83630.02, fiyat: 11510000, kira: 63900, sorunlar: []},
+            {no: 20, daire: "A1-62", blok: "A1", kat: "12.NORMAL KAT", tip: "2+1 TİP G", cephe: "G-D VADİ-VADİ", bahce: 0, m2: 137.63, birim: 85192.18, fiyat: 11725000, kira: 65100, sorunlar: []},
+            {no: 21, daire: "A1-64", blok: "A1", kat: "13.NORMAL KAT", tip: "4+1 TİP A", cephe: "K-G-B VADİ-ŞEHİR-ŞEHİR", bahce: 0, m2: 294.28, birim: 82676.36, fiyat: 24330000, kira: 131500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "31.07.2025"},
+            {no: 22, daire: "A1-65", blok: "A1", kat: "13.NORMAL KAT", tip: "2+1 TİP G", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 125.87, birim: 84412.49, fiyat: 10625000, kira: 60700, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "31.07.2025"},
+            {no: 23, daire: "A1-66", blok: "A1", kat: "13.NORMAL KAT", tip: "2+1 TİP G", cephe: "G-D VADİ-VADİ", bahce: 0, m2: 125.87, birim: 81671.57, fiyat: 10280000, kira: 58700, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "31.07.2025"},
+            {no: 24, daire: "A2-3", blok: "A2", kat: "ZEMİN KAT", tip: "2+1 TİP E BAHÇE", cephe: "G-D PEYZAJ-ŞEHİR", bahce: 39.99, m2: 137.4, birim: 96084.43, fiyat: 13202000, kira: 73300, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Açık", teslim: "31.07.2025"},
+            {no: 25, daire: "A2-4", blok: "A2", kat: "ZEMİN KAT", tip: "2+1 TİP E BAHÇE", cephe: "B-G AVM-PEYZAJ", bahce: 39.99, m2: 137.4, birim: 94694.32, fiyat: 13011000, kira: 72300, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Açık", teslim: "31.07.2025"},
+            {no: 26, daire: "A2-5", blok: "A2", kat: "ZEMİN KAT", tip: "2+1 DUBLEKS", cephe: "B AVM", bahce: 12.39, m2: 120.08, birim: 85942.70, fiyat: 10320000, kira: 59000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Açık", teslim: "31.07.2025"},
+            {no: 27, daire: "A2-8", blok: "A2", kat: "1.NORMAL KAT", tip: "2+1 TİP E", cephe: "G-D PEYZAJ-ŞEHİR", bahce: 0, m2: 137.39, birim: 81148.56, fiyat: 11149000, kira: 61900, sorunlar: []},
+            {no: 28, daire: "A2-9", blok: "A2", kat: "1.NORMAL KAT", tip: "2+1 TİP E", cephe: "B-G AVM-PEYZAJ", bahce: 0, m2: 137.39, birim: 80369.75, fiyat: 11042000, kira: 61300, sorunlar: []},
+            {no: 29, daire: "A2-37", blok: "A2", kat: "7.NORMAL KAT", tip: "3+1 TİP A", cephe: "G-D PEYZAJ-ŞEHİR", bahce: 0, m2: 146.78, birim: 82960.89, fiyat: 12177000, kira: 67700, sorunlar: []},
+            {no: 30, daire: "A2-38", blok: "A2", kat: "7.NORMAL KAT", tip: "3+1 TİP A", cephe: "B-G ŞEHİR-PEYZAJ", bahce: 0, m2: 146.78, birim: 82831.45, fiyat: 12158000, kira: 67500, sorunlar: []},
+            {no: 31, daire: "A2-41", blok: "A2", kat: "8.NORMAL KAT", tip: "3+1 TİP B", cephe: "K-D ŞEHİR-ŞEHİR", bahce: 0, m2: 157.95, birim: 81753.72, fiyat: 12913000, kira: 71700, sorunlar: []},
+            {no: 32, daire: "A2-42", blok: "A2", kat: "8.NORMAL KAT", tip: "3+1 TİP A", cephe: "G-D PEYZAJ-ŞEHİR", bahce: 0, m2: 146.78, birim: 83097.15, fiyat: 12197000, kira: 67800, sorunlar: []},
+            {no: 33, daire: "A2-43", blok: "A2", kat: "8.NORMAL KAT", tip: "3+1 TİP A", cephe: "B-G ŞEHİR-PEYZAJ", bahce: 0, m2: 146.78, birim: 82899.58, fiyat: 12168000, kira: 67600, sorunlar: []},
+            {no: 34, daire: "A2-45", blok: "A2", kat: "9.NORMAL KAT", tip: "2+1 TİP G", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 137.8, birim: 82322.21, fiyat: 11344000, kira: 63000, sorunlar: []},
+            {no: 35, daire: "A2-46", blok: "A2", kat: "9.NORMAL KAT", tip: "2+1 TİP G", cephe: "K-D ŞEHİR-ŞEHİR", bahce: 0, m2: 137.8, birim: 82336.72, fiyat: 11346000, kira: 63000, sorunlar: []},
+            {no: 36, daire: "A2-47", blok: "A2", kat: "9.NORMAL KAT", tip: "4+1 TİP A", cephe: "G-B-D PEYZAJ-ŞEHİR-DENİZ", bahce: 0, m2: 314.21, birim: 80745.36, fiyat: 25371000, kira: 137100, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "31.07.2025"},
+            {no: 37, daire: "A2-49", blok: "A2", kat: "10.NORMAL KAT", tip: "2+1 TİP G", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 126.02, birim: 82494.84, fiyat: 10396000, kira: 59400, sorunlar: []},
+            {no: 38, daire: "A2-50", blok: "A2", kat: "10.NORMAL KAT", tip: "2+1 TİP G", cephe: "K-D ŞEHİR-ŞEHİR", bahce: 0, m2: 126.18, birim: 82921.22, fiyat: 10463000, kira: 59800, sorunlar: []},
+            {no: 39, daire: "A2-51", blok: "A2", kat: "10.NORMAL KAT", tip: "4+1 TİP A", cephe: "G-B-D PEYZAJ-ŞEHİR-DENİZ", bahce: 0, m2: 294.66, birim: 81327.63, fiyat: 23964000, kira: 129500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "31.07.2025"},
+            {no: 40, daire: "B-4", blok: "B", kat: "ZEMİN KAT", tip: "2+1 TİP E BAHÇE", cephe: "K-B PEYZAJ-TİC. BLOKLARI", bahce: 40.01, m2: 137.79, birim: 93403.00, fiyat: 12870000, kira: 71500, sorunlar: ["Subasman", "Termostat", "Ocak/Davlumbaz", "Led Trafo", "Derz Boşlukları", "Elektrik Pano", "Banyo Seramik Arka Boşluğu", "Seramik Kırıkları", "Genel Temizlik", "Merkezi Sistem", "Boya", "Parke Çizikleri", "Cam Çizik/Kırık", "Çıta", "Dış Kapı", "Kapı-Profil", "Mutfak Tezgah", "Elektrik", "Su", "Mastik", "Süpürgelik", "Banyo Teknik", "Mobilya"], mutfak: "Açık", teslim: "14.10.2025", sorunSayisi: 23},
+            {no: 41, daire: "B-5", blok: "B", kat: "ZEMİN KAT", tip: "2+1 TİP E BAHÇE", cephe: "K-D PEYZAJ-VADİ", bahce: 40.02, m2: 137.79, birim: 93744.10, fiyat: 12917000, kira: 71800, sorunlar: ["Subasman", "Termostat", "Ocak/Davlumbaz", "Led Trafo", "Derz Boşlukları", "Elektrik Pano", "Banyo Seramik Arka Boşluğu", "Seramik Kırıkları", "Genel Temizlik", "Merkezi Sistem", "Boya", "Parke Çizikleri", "Cam Çizik/Kırık", "Çıta", "Dış Kapı", "Kapı-Profil", "Mutfak Tezgah", "Elektrik", "Su", "Mastik", "Süpürgelik", "Banyo Teknik", "Mobilya"], mutfak: "Açık", teslim: "14.10.2025", sorunSayisi: 23},
+            {no: 42, daire: "B-6", blok: "B", kat: "ZEMİN KAT", tip: "2+1 DUBLEKS", cephe: "D VADİ", bahce: 0, m2: 119.97, birim: 85012.92, fiyat: 10199000, kira: 58300, sorunlar: ["Subasman", "Termostat", "Ocak/Davlumbaz", "Led Trafo", "Derz Boşlukları", "Elektrik Pano", "Banyo Seramik Arka Boşluğu", "Seramik Kırıkları", "Genel Temizlik", "Merkezi Sistem", "Boya", "Parke Çizikleri", "Cam Çizik/Kırık", "Çıta", "Dış Kapı", "Kapı-Profil", "Mutfak Tezgah", "Elektrik", "Su", "Mastik", "Süpürgelik", "Banyo Teknik", "Mobilya"], mutfak: "Açık", teslim: "14.10.2025", sorunSayisi: 23},
+            {no: 43, daire: "B-27", blok: "B", kat: "4.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-B PEYZAJ-TİC. BLOKLARI", bahce: 0, m2: 147.22, birim: 80478.20, fiyat: 11848000, kira: 65800, sorunlar: []},
+            {no: 44, daire: "B-34", blok: "B", kat: "5.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 147.22, birim: 81150.66, fiyat: 11947000, kira: 66400, sorunlar: []},
+            {no: 45, daire: "B-40", blok: "B", kat: "6.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 147.22, birim: 81347.64, fiyat: 11976000, kira: 66500, sorunlar: []},
+            {no: 46, daire: "B-42", blok: "B", kat: "7.NORMAL KAT", tip: "3+1 TİP B", cephe: "D-G VADİ-TİC. BLOKLARI", bahce: 0, m2: 138.03, birim: 82677.68, fiyat: 11412000, kira: 63400, sorunlar: []},
+            {no: 47, daire: "B-45", blok: "B", kat: "7.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-B PEYZAJ-ŞEHİR", bahce: 0, m2: 147.22, birim: 81259.34, fiyat: 11963000, kira: 66500, sorunlar: []},
+            {no: 48, daire: "B-46", blok: "B", kat: "7.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 147.22, birim: 81544.63, fiyat: 12005000, kira: 66700, sorunlar: []},
+            {no: 49, daire: "B-48", blok: "B", kat: "8.NORMAL KAT", tip: "3+1 TİP B", cephe: "D-G VADİ-TİC.BLOKLARI", bahce: 0, m2: 158.41, birim: 82867.24, fiyat: 13127000, kira: 72900, sorunlar: []},
+            {no: 50, daire: "B-51", blok: "B", kat: "8.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-B PEYZAJ-DENİZ", bahce: 0, m2: 147.22, birim: 81456.32, fiyat: 11992000, kira: 66600, sorunlar: []},
+            {no: 51, daire: "B-52", blok: "B", kat: "8.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 147.22, birim: 81734.82, fiyat: 12033000, kira: 66900, sorunlar: []},
+            {no: 52, daire: "B-54", blok: "B", kat: "9.NORMAL KAT", tip: "3+1 TİP B", cephe: "D-G VADİ-TİC.BLOKLARI", bahce: 0, m2: 138.03, birim: 83257.26, fiyat: 11492000, kira: 63800, sorunlar: []},
+            {no: 53, daire: "B-58", blok: "B", kat: "9.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 147.22, birim: 82128.79, fiyat: 12091000, kira: 67200, sorunlar: []},
+            {no: 54, daire: "B-64", blok: "B", kat: "10.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 147.22, birim: 82515.96, fiyat: 12148000, kira: 67500, sorunlar: []},
+            {no: 55, daire: "B-66", blok: "B", kat: "11.NORMAL KAT", tip: "3+1 TİP B", cephe: "D-G VADİ-TİC.BLOKLARI", bahce: 0, m2: 158.41, birim: 83845.72, fiyat: 13282000, kira: 73800, sorunlar: []},
+            {no: 56, daire: "B-70", blok: "B", kat: "11.NORMAL KAT", tip: "3+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 147.22, birim: 82712.95, fiyat: 12177000, kira: 67700, sorunlar: []},
+            {no: 57, daire: "B-71", blok: "B", kat: "11.NORMAL KAT", tip: "2+1 TİP C", cephe: "D VADİ", bahce: 0, m2: 92.3, birim: 83271.94, fiyat: 7686000, kira: 43900, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Açık", teslim: "02.10.2025"},
+            {no: 58, daire: "B-72", blok: "B", kat: "12.NORMAL KAT", tip: "2+1 TİP G", cephe: "D-G VADİ-TİC.BLOKLARI", bahce: 0, m2: 137.92, birim: 84229.99, fiyat: 11617000, kira: 64500, sorunlar: []},
+            {no: 59, daire: "B-73", blok: "B", kat: "12.NORMAL KAT", tip: "2+1 TİP G", cephe: "B-G DENİZ-TİC.BLOKLARI", bahce: 0, m2: 138.4, birim: 84934.97, fiyat: 11755000, kira: 65300, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "02.10.2025"},
+            {no: 60, daire: "B-77", blok: "B", kat: "13.NORMAL KAT", tip: "2+1 TİP G", cephe: "D-G VADİ-TİC.BLOKLARI", bahce: 0, m2: 126.3, birim: 85011.88, fiyat: 10737000, kira: 61400, sorunlar: []},
+            {no: 61, daire: "B-80", blok: "B", kat: "13.NORMAL KAT", tip: "4+1 TİP A", cephe: "K-D-B DENİZ-PEYZAJ-VADİ", bahce: 0, m2: 303.37, birim: 82710.88, fiyat: 25092000, kira: 135600, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Merkezi Sistem", "Cam Çizik/Kırık"], teslim: "02.10.2025"},
+            {no: 62, daire: "C1-2", blok: "C1", kat: "ZEMİN KAT", tip: "3+1 TİP C BAHÇE", cephe: "D-G VADİ-PEYZAJ", bahce: 51.00, m2: 193.99, birim: 92571.78, fiyat: 17958000, kira: 99800, sorunlar: ["Subasman", "Termostat", "Ocak/Davlumbaz", "Led Trafo", "Derz Boşlukları", "Elektrik Pano", "Banyo Seramik Arka Boşluğu", "Seramik Kırıkları", "Genel Temizlik", "Merkezi Sistem", "Boya", "Parke Çizikleri", "Cam Çizik/Kırık", "Çıta", "Dış Kapı", "Kapı-Profil", "Mutfak Tezgah", "Elektrik", "Su", "Mastik", "Süpürgelik", "Banyo Teknik", "Mobilya"], teslim: "14.10.2025", sorunSayisi: 23},
+            {no: 63, daire: "C1-3", blok: "C1", kat: "ZEMİN KAT", tip: "1+1 TİP C", cephe: "B-G PEYZAJ-PEYZAJ", bahce: 0, m2: 97.7, birim: 80982.60, fiyat: 7912000, kira: 45200, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "09.10.2025"},
+            {no: 64, daire: "C1-4", blok: "C1", kat: "ZEMİN KAT", tip: "2+1 TİP F BAHÇE", cephe: "K-B ŞEHİR-PEYZAJ", bahce: 54.13, m2: 164.51, birim: 96790.47, fiyat: 15923000, kira: 88500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Açık", teslim: "01.08.2025"},
+            {no: 65, daire: "C1-21", blok: "C1", kat: "4.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 130.17, birim: 81577.94, fiyat: 10619000, kira: 59000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "01.08.2025"},
+            {no: 66, daire: "C1-39", blok: "C1", kat: "7.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 117.07, birim: 81968.05, fiyat: 9596000, kira: 54800, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 67, daire: "C1-45", blok: "C1", kat: "8.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 117.22, birim: 82357.96, fiyat: 9654000, kira: 55200, sorunlar: []},
+            {no: 68, daire: "C1-49", blok: "C1", kat: "8.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-B ŞEHİR-PEYZAJ", bahce: 0, m2: 118.41, birim: 82425.47, fiyat: 9760000, kira: 55800, sorunlar: []},
+            {no: 69, daire: "C1-51", blok: "C1", kat: "9.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 130.33, birim: 83135.12, fiyat: 10835000, kira: 60200, sorunlar: []},
+            {no: 70, daire: "C1-54", blok: "C1", kat: "9.NORMAL KAT", tip: "2+1 TİP A", cephe: "B-G PEYZAJ-PEYZAJ", bahce: 0, m2: 117.19, birim: 83880.88, fiyat: 9830000, kira: 56200, sorunlar: []},
+            {no: 71, daire: "C1-55", blok: "C1", kat: "9.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-B ŞEHİR-PEYZAJ", bahce: 0, m2: 118.41, birim: 83202.43, fiyat: 9852000, kira: 56300, sorunlar: []},
+            {no: 72, daire: "C1-57", blok: "C1", kat: "10.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 117.16, birim: 83910.89, fiyat: 9831000, kira: 56200, sorunlar: []},
+            {no: 73, daire: "C1-58", blok: "C1", kat: "10.NORMAL KAT", tip: "3+1 TİP C", cephe: "D-G VADİ-PEYZAJ", bahce: 0, m2: 196.02, birim: 78946.03, fiyat: 15475000, kira: 86000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 74, daire: "C1-60", blok: "C1", kat: "10.NORMAL KAT", tip: "3+1 TİP C", cephe: "K-B ŞEHİR-PEYZAJ", bahce: 0, m2: 196.02, birim: 82955.82, fiyat: 16261000, kira: 90300, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 75, daire: "C1-61", blok: "C1", kat: "11.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-D ŞEHİR-VADİ", bahce: 0, m2: 130.28, birim: 84303.04, fiyat: 10983000, kira: 61000, sorunlar: []},
+            {no: 76, daire: "C1-62", blok: "C1", kat: "11.NORMAL KAT", tip: "3+1 TİP C", cephe: "D-G VADİ-PEYZAJ", bahce: 0, m2: 193.45, birim: 79317.65, fiyat: 15344000, kira: 85200, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 77, daire: "C1-63", blok: "C1", kat: "11.NORMAL KAT", tip: "2+1 TİP A", cephe: "B-G PEYZAJ-PEYZAJ", bahce: 0, m2: 116.97, birim: 84799.52, fiyat: 9919000, kira: 56700, sorunlar: []},
+            {no: 78, daire: "C1-64", blok: "C1", kat: "11.NORMAL KAT", tip: "3+1 TİP C", cephe: "K-B ŞEHİR-PEYZAJ", bahce: 0, m2: 193.45, birim: 83349.70, fiyat: 16124000, kira: 89600, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 79, daire: "C2-2", blok: "C2", kat: "ZEMİN KAT", tip: "3+1 TİP C BAHÇE", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 51.00, m2: 193.99, birim: 91164.49, fiyat: 17685000, kira: 98300, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 80, daire: "C2-4", blok: "C2", kat: "ZEMİN KAT", tip: "2+1 TİP F BAHÇE", cephe: "D-G VADİ-VADİ", bahce: 54.13, m2: 164.51, birim: 96523.01, fiyat: 15879000, kira: 88200, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Açık", teslim: "01.08.2025"},
+            {no: 81, daire: "C2-45", blok: "C2", kat: "8.NORMAL KAT", tip: "2+1 TİP A", cephe: "B-G PEYZAJ-VADİ", bahce: 0, m2: 117.27, birim: 83013.56, fiyat: 9735000, kira: 55600, sorunlar: []},
+            {no: 82, daire: "C2-46", blok: "C2", kat: "8.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 118.39, birim: 81594.73, fiyat: 9660000, kira: 55200, sorunlar: []},
+            {no: 83, daire: "C2-51", blok: "C2", kat: "9.NORMAL KAT", tip: "2+1 TİP A", cephe: "B-G PEYZAJ-VADİ", bahce: 0, m2: 130.38, birim: 83755.18, fiyat: 10920000, kira: 60700, sorunlar: []},
+            {no: 84, daire: "C2-52", blok: "C2", kat: "9.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 118.39, birim: 82329.59, fiyat: 9747000, kira: 55700, sorunlar: []},
+            {no: 85, daire: "C2-55", blok: "C2", kat: "9.NORMAL KAT", tip: "2+1 TİP B", cephe: "D-G VADİ-VADİ", bahce: 0, m2: 118.45, birim: 83782.19, fiyat: 9924000, kira: 56700, sorunlar: []},
+            {no: 86, daire: "C2-58", blok: "C2", kat: "10.NORMAL KAT", tip: "3+1 TİP C", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 196.03, birim: 76692.34, fiyat: 15034000, kira: 83500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 87, daire: "C2-59", blok: "C2", kat: "10.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 117.02, birim: 82319.26, fiyat: 9633000, kira: 55000, sorunlar: []},
+            {no: 88, daire: "C2-60", blok: "C2", kat: "10.NORMAL KAT", tip: "3+1 TİP C", cephe: "D-G VADİ-VADİ", bahce: 0, m2: 196.03, birim: 77901.34, fiyat: 15271000, kira: 84800, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 89, daire: "C2-61", blok: "C2", kat: "11.NORMAL KAT", tip: "2+1 TİP A", cephe: "B-G PEYZAJ-VADİ", bahce: 0, m2: 130.13, birim: 83562.59, fiyat: 10874000, kira: 60400, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "01.08.2025"},
+            {no: 90, daire: "C2-62", blok: "C2", kat: "11.NORMAL KAT", tip: "3+1 TİP C", cephe: "K-B PEYZAJ-PEYZAJ", bahce: 0, m2: 193.46, birim: 77059.86, fiyat: 14908000, kira: 82800, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 91, daire: "C2-63", blok: "C2", kat: "11.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-D PEYZAJ-VADİ", bahce: 0, m2: 117.02, birim: 82712.36, fiyat: 9679000, kira: 55300, sorunlar: []},
+            {no: 92, daire: "C2-64", blok: "C2", kat: "11.NORMAL KAT", tip: "3+1 TİP C", cephe: "D-G VADİ-VADİ", bahce: 0, m2: 193.46, birim: 78274.58, fiyat: 15143000, kira: 84100, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "01.08.2025"},
+            {no: 93, daire: "C3-1", blok: "C3", kat: "ZEMİN KAT", tip: "2+1 TİP F BAHÇE", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 54.13, m2: 164.58, birim: 96901.20, fiyat: 15948000, kira: 88600, sorunlar: ["Banyo Seramik Arka Boşluğu", "Led Trafo Topraklaması", "Ocak/Davlumbaz", "Genel Temizlik", "Merkezi Sistem", "Parke Çizikleri"], mutfak: "Açık", teslim: "09.10.2025", sorunSayisi: 6},
+            {no: 94, daire: "C3-2", blok: "C3", kat: "ZEMİN KAT", tip: "1+1 TİP C", cephe: "G-D PEYZAJ-PEYZAJ", bahce: 0, m2: 97.75, birim: 82301.79, fiyat: 8045000, kira: 46000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Merkezi Sistem", "Parke Çizikleri", "Elektrik", "Su"], mutfak: "Kapalı", teslim: "14.10.2025", sorunSayisi: 6},
+            {no: 95, daire: "C3-3", blok: "C3", kat: "ZEMİN KAT", tip: "3+1 TİP C BAHÇE", cephe: "B-G AVM-PEYZAJ", bahce: 51.00, m2: 194.08, birim: 94254.95, fiyat: 18293000, kira: 101600, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "06.08.2025", sorunSayisi: 3},
+            {no: 96, daire: "C3-25", blok: "C3", kat: "4.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B ŞEHİR-AVM", bahce: 0, m2: 130.23, birim: 82246.79, fiyat: 10711000, kira: 59500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Süpürgelik"], mutfak: "Kapalı", teslim: "06.08.2025", sorunSayisi: 3},
+            {no: 97, daire: "C3-37", blok: "C3", kat: "6.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B ŞEHİR-ŞEHİR", bahce: 0, m2: 117.29, birim: 82564.58, fiyat: 9684000, kira: 55300, sorunlar: []},
+            {no: 98, daire: "C3-45", blok: "C3", kat: "8.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 118.46, birim: 82956.27, fiyat: 9827000, kira: 56200, sorunlar: []},
+            {no: 99, daire: "C3-46", blok: "C3", kat: "8.NORMAL KAT", tip: "2+1 TİP A", cephe: "G-D PEYZAJ-PEYZAJ", bahce: 0, m2: 117.27, birim: 84164.75, fiyat: 9870000, kira: 56400, sorunlar: []},
+            {no: 100, daire: "C3-48", blok: "C3", kat: "8.NORMAL KAT", tip: "2+1 TİP B", cephe: "B-G DENİZ-PEYZAJ", bahce: 0, m2: 118.49, birim: 84023.97, fiyat: 9956000, kira: 56900, sorunlar: []},
+            {no: 101, daire: "C3-49", blok: "C3", kat: "8.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 117.29, birim: 83024.98, fiyat: 9738000, kira: 55600, sorunlar: []},
+            {no: 102, daire: "C3-51", blok: "C3", kat: "9.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 118.46, birim: 83741.35, fiyat: 9920000, kira: 56700, sorunlar: []},
+            {no: 103, daire: "C3-54", blok: "C3", kat: "9.NORMAL KAT", tip: "2+1 TİP B", cephe: "B-G DENİZ-PEYZAJ", bahce: 0, m2: 118.49, birim: 84800.41, fiyat: 10048000, kira: 57400, sorunlar: []},
+            {no: 104, daire: "C3-55", blok: "C3", kat: "9.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 130.37, birim: 83807.62, fiyat: 10926000, kira: 60700, sorunlar: []},
+            {no: 105, daire: "C3-57", blok: "C3", kat: "10.NORMAL KAT", tip: "3+1 TİP C", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 196.11, birim: 83488.86, fiyat: 16373000, kira: 91000, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik", "Parke Çizikleri", "Çıta", "Cam Çizik/Kırık", "Dış Kapı", "Su", "Süpürgelik"], teslim: "24.09.2025", sorunSayisi: 9},
+            {no: 106, daire: "C3-58", blok: "C3", kat: "10.NORMAL KAT", tip: "2+1 TİP A", cephe: "G-D PEYZAJ-PEYZAJ", bahce: 0, m2: 117.25, birim: 85722.81, fiyat: 10051000, kira: 57400, sorunlar: []},
+            {no: 107, daire: "C3-59", blok: "C3", kat: "10.NORMAL KAT", tip: "3+1 TİP C", cephe: "B-G DENİZ-PEYZAJ", bahce: 0, m2: 196.11, birim: 84554.59, fiyat: 16582000, kira: 92100, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik", "Parke Çizikleri", "Süpürgelik"], teslim: "06.08.2025", sorunSayisi: 5},
+            {no: 108, daire: "C3-60", blok: "C3", kat: "10.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 117.29, birim: 84585.22, fiyat: 9921000, kira: 56700, sorunlar: []},
+            {no: 109, daire: "C3-61", blok: "C3", kat: "11.NORMAL KAT", tip: "3+1 TİP C", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 193.54, birim: 84266.82, fiyat: 16309000, kira: 90600, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Elektrik Pano", "Ocak/Davlumbaz", "Genel Temizlik", "Su"], teslim: "21.08.2025", sorunSayisi: 6},
+            {no: 110, daire: "C3-62", blok: "C3", kat: "11.NORMAL KAT", tip: "2+1 TİP A", cephe: "G-D PEYZAJ-PEYZAJ", bahce: 0, m2: 117.25, birim: 86498.93, fiyat: 10142000, kira: 58000, sorunlar: []},
+            {no: 111, daire: "C3-63", blok: "C3", kat: "11.NORMAL KAT", tip: "3+1 TİP C", cephe: "B-G DENİZ-PEYZAJ", bahce: 0, m2: 193.54, birim: 85331.20, fiyat: 16515000, kira: 91800, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "06.08.2025", sorunSayisi: 3},
+            {no: 112, daire: "C3-64", blok: "C3", kat: "11.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 130.36, birim: 85363.61, fiyat: 11128000, kira: 61800, sorunlar: []},
+            {no: 113, daire: "C4-1", blok: "C4", kat: "ZEMİN KAT", tip: "2+1 TİP F BAHÇE", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 54.13, m2: 164.51, birim: 96948.51, fiyat: 15949000, kira: 88600, sorunlar: ["Banyo Seramik Arka Boşluğu", "Led Trafo Topraklaması", "Ocak/Davlumbaz", "Genel Temizlik", "Merkezi Sistem", "Elektrik", "Süpürgelik", "Mobilya"], mutfak: "Açık", teslim: "09.10.2025", sorunSayisi: 8},
+            {no: 114, daire: "C4-2", blok: "C4", kat: "ZEMİN KAT", tip: "1+1 TİP C", cephe: "G-D PEYZAJ-SOSYAL TESİS", bahce: 0, m2: 97.7, birim: 82057.32, fiyat: 8017000, kira: 45800, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "26.08.2025", sorunSayisi: 3},
+            {no: 115, daire: "C4-3", blok: "C4", kat: "ZEMİN KAT", tip: "3+1 TİP C BAHÇE", cephe: "B-G AVM-SOSYAL TESİS", bahce: 51.00, m2: 193.99, birim: 89942.78, fiyat: 17448000, kira: 96900, sorunlar: ["Led Trafo Topraklaması", "Elektrik Pano", "Genel Temizlik", "Merkezi Sistem", "Elektrik", "Su", "Süpürgelik"], teslim: "30.09.2025", sorunSayisi: 7},
+            {no: 116, daire: "C4-25", blok: "C4", kat: "4.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B ŞEHİR-AVM", bahce: 0, m2: 130.17, birim: 82284.70, fiyat: 10711000, kira: 59500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "26.08.2025"},
+            {no: 117, daire: "C4-33", blok: "C4", kat: "6.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 118.46, birim: 82525.75, fiyat: 9776000, kira: 55900, sorunlar: []},
+            {no: 118, daire: "C4-39", blok: "C4", kat: "7.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 118.46, birim: 82601.72, fiyat: 9785000, kira: 55900, sorunlar: []},
+            {no: 119, daire: "C4-43", blok: "C4", kat: "7.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B ŞEHİR-ŞEHİR", bahce: 0, m2: 117.07, birim: 82677.03, fiyat: 9679000, kira: 55300, sorunlar: ["Led Trafo Topraklaması", "Ocak/Davlumbaz", "Genel Temizlik"], mutfak: "Kapalı", teslim: "26.08.2025", sorunSayisi: 3},
+            {no: 120, daire: "C4-45", blok: "C4", kat: "8.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 118.46, birim: 82990.04, fiyat: 9831000, kira: 56200, sorunlar: []},
+            {no: 121, daire: "C4-48", blok: "C4", kat: "8.NORMAL KAT", tip: "2+1 TİP B", cephe: "B-G DENİZ-PEYZAJ", bahce: 0, m2: 118.49, birim: 83770.78, fiyat: 9926000, kira: 56700, sorunlar: []},
+            {no: 122, daire: "C4-49", blok: "C4", kat: "8.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 117.29, birim: 83067.61, fiyat: 9743000, kira: 55700, sorunlar: []},
+            {no: 123, daire: "C4-51", blok: "C4", kat: "9.NORMAL KAT", tip: "2+1 TİP B", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 118.46, birim: 84163.43, fiyat: 9970000, kira: 57000, sorunlar: []},
+            {no: 124, daire: "C4-55", blok: "C4", kat: "9.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 130.17, birim: 84904.36, fiyat: 11052000, kira: 61400, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], mutfak: "Kapalı", teslim: "21.08.2025"},
+            {no: 125, daire: "C4-59", blok: "C4", kat: "10.NORMAL KAT", tip: "3+1 TİP C", cephe: "B-G DENİZ-PEYZAJ", bahce: 0, m2: 196.02, birim: 84302.62, fiyat: 16525000, kira: 91800, sorunlar: ["Led Trafo Topraklaması", "Led Trafo Topraklaması", "Elektrik Pano", "Genel Temizlik"], teslim: "21.08.2025", sorunSayisi: 4},
+            {no: 126, daire: "C4-61", blok: "C4", kat: "11.NORMAL KAT", tip: "3+1 TİP C", cephe: "K-D ŞEHİR-PEYZAJ", bahce: 0, m2: 193.45, birim: 81850.61, fiyat: 15834000, kira: 88000, sorunlar: ["Led Trafo Topraklaması", "Led Trafo Topraklaması", "Genel Temizlik", "Elektrik"], teslim: "16.09.2025", sorunSayisi: 4},
+            {no: 127, daire: "C4-62", blok: "C4", kat: "11.NORMAL KAT", tip: "2+1 TİP A", cephe: "G-D PEYZAJ-PEYZAJ", bahce: 0, m2: 117.25, birim: 86328.36, fiyat: 10122000, kira: 57800, sorunlar: []},
+            {no: 128, daire: "C4-63", blok: "C4", kat: "11.NORMAL KAT", tip: "3+1 TİP C", cephe: "B-G DENİZ-PEYZAJ", bahce: 0, m2: 193.45, birim: 85158.96, fiyat: 16474000, kira: 91500, sorunlar: ["Led Trafo Topraklaması", "Ocak/Davlumbaz", "Genel Temizlik", "Çıta", "Su"], teslim: "16.09.2025", sorunSayisi: 5},
+            {no: 129, daire: "C4-64", blok: "C4", kat: "11.NORMAL KAT", tip: "2+1 TİP A", cephe: "K-B DENİZ-ŞEHİR", bahce: 0, m2: 130.36, birim: 85478.67, fiyat: 11143000, kira: 61900, sorunlar: []},
+            {no: 130, daire: "D-1", blok: "D", kat: "1.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-B AVM-AVM", bahce: 23.45, m2: 76.32, birim: 87945.49, fiyat: 6712000, kira: 38400, sorunlar: ["Led Trafo Topraklaması", "Elektrik Pano", "Genel Temizlik", "Çıta", "Cam Çizik/Kırık", "Elektrik", "Süpürgelik"], teslim: "16.09.2025", sorunSayisi: 7},
+            {no: 131, daire: "D-3", blok: "D", kat: "1.NORMAL KAT", tip: "1+1 TİP A", cephe: "K ŞEHİR", bahce: 33.27, m2: 66.38, birim: 102636.34, fiyat: 6813000, kira: 38900, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025"},
+            {no: 132, daire: "D-4", blok: "D", kat: "1.NORMAL KAT", tip: "1+1 TİP A", cephe: "K ŞEHİR", bahce: 34.19, m2: 66.25, birim: 103366.04, fiyat: 6848000, kira: 39100, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025"},
+            {no: 133, daire: "D-5", blok: "D", kat: "1.NORMAL KAT", tip: "1+1 TİP A", cephe: "K ŞEHİR", bahce: 34.10, m2: 66.1, birim: 103343.42, fiyat: 6831000, kira: 39000, sorunlar: ["Subasman", "Termostat", "Led Trafo Topraklaması", "Genel Temizlik", "Merkezi Sistem"], teslim: "28.08.2025", sorunSayisi: 5},
+            {no: 134, daire: "D-6", blok: "D", kat: "1.NORMAL KAT", tip: "1+1 TİP A", cephe: "K ŞEHİR", bahce: 34.24, m2: 66.2, birim: 103413.90, fiyat: 6846000, kira: 39100, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "28.08.2025"},
+            {no: 135, daire: "D-7", blok: "D", kat: "1.NORMAL KAT", tip: "1+1 TİP A", cephe: "K ŞEHİR", bahce: 34.03, m2: 66.1, birim: 103298.03, fiyat: 6828000, kira: 39000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "16.09.2025"},
+            {no: 136, daire: "D-8", blok: "D", kat: "1.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 31.28, m2: 74.92, birim: 99119.06, fiyat: 7426000, kira: 42400, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025"},
+            {no: 137, daire: "D-20", blok: "D", kat: "2.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 78590.15, fiyat: 5998000, kira: 34300, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025", sorunSayisi: 3},
+            {no: 138, daire: "D-21", blok: "D", kat: "2.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D ŞEHİR-AVM", bahce: 0, m2: 76.32, birim: 79297.69, fiyat: 6052000, kira: 34600, sorunlar: ["Subasman", "Termostat", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025", sorunSayisi: 4},
+            {no: 139, daire: "D-32", blok: "D", kat: "3.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 78668.76, fiyat: 6004000, kira: 34300, sorunlar: ["Subasman", "Termostat", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025", sorunSayisi: 4},
+            {no: 140, daire: "D-33", blok: "D", kat: "3.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D ŞEHİR-AVM", bahce: 0, m2: 76.32, birim: 79376.31, fiyat: 6058000, kira: 34600, sorunlar: ["Subasman", "Termostat", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025", sorunSayisi: 4},
+            {no: 141, daire: "D-37", blok: "D", kat: "4.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-B AVM-AVM", bahce: 0, m2: 83.09, birim: 75737.15, fiyat: 6293000, kira: 36000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Parke Çizikleri"], teslim: "28.08.2025", sorunSayisi: 3},
+            {no: 142, daire: "D-38", blok: "D", kat: "4.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-B ŞEHİR", bahce: 0, m2: 76.32, birim: 79009.43, fiyat: 6030000, kira: 34500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025"},
+            {no: 143, daire: "D-44", blok: "D", kat: "4.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 83.09, birim: 78866.29, fiyat: 6553000, kira: 37400, sorunlar: ["Termostat", "Led Trafo Topraklaması", "Elektrik Pano", "Genel Temizlik", "Kapı-Profil", "Süpürgelik"], teslim: "15.08.2025", sorunSayisi: 6},
+            {no: 144, daire: "D-45", blok: "D", kat: "4.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D ŞEHİR-AVM", bahce: 0, m2: 76.32, birim: 79572.85, fiyat: 6073000, kira: 34700, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "15.08.2025"},
+            {no: 145, daire: "D-50", blok: "D", kat: "5.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-B ŞEHİR", bahce: 0, m2: 76.32, birim: 79088.05, fiyat: 6036000, kira: 34500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "15.08.2025"},
+            {no: 146, daire: "D-56", blok: "D", kat: "5.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 78943.92, fiyat: 6025000, kira: 34400, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "12.08.2025"},
+            {no: 147, daire: "D-57", blok: "D", kat: "5.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D ŞEHİR-AVM", bahce: 0, m2: 76.32, birim: 79651.47, fiyat: 6079000, kira: 34700, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "12.08.2025"},
+            {no: 148, daire: "D-61", blok: "D", kat: "6.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-B AVM-AVM", bahce: 0, m2: 76.32, birim: 79834.91, fiyat: 6093000, kira: 34800, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "12.08.2025"},
+            {no: 149, daire: "D-62", blok: "D", kat: "6.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-B ŞEHİR", bahce: 0, m2: 83.13, birim: 79129.07, fiyat: 6578000, kira: 37600, sorunlar: ["Banyo Seramik Arka Boşluğu", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "12.08.2025", sorunSayisi: 3},
+            {no: 150, daire: "D-68", blok: "D", kat: "6.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 78983.23, fiyat: 6028000, kira: 34400, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "12.08.2025"},
+            {no: 151, daire: "D-69", blok: "D", kat: "6.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D ŞEHİR-AVM", bahce: 0, m2: 83.07, birim: 79691.83, fiyat: 6620000, kira: 37800, sorunlar: ["Banyo Seramik Arka Boşluğu", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "12.08.2025", sorunSayisi: 3},
+            {no: 152, daire: "D-73", blok: "D", kat: "7.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-B AVM-AVM", bahce: 0, m2: 76.32, birim: 79913.52, fiyat: 6099000, kira: 34900, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "12.08.2025", sorunSayisi: 3},
+            {no: 153, daire: "D-74", blok: "D", kat: "7.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-B ŞEHİR", bahce: 0, m2: 76.32, birim: 79205.97, fiyat: 6045000, kira: 34500, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "28.08.2025", sorunSayisi: 3},
+            {no: 154, daire: "D-80", blok: "D", kat: "7.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 79061.84, fiyat: 6034000, kira: 34500, sorunlar: ["Subasman", "Banyo Seramik Arka Boşluğu", "Led Trafo Topraklaması", "Genel Temizlik", "Çıta", "Elektrik"], teslim: "12.08.2025", sorunSayisi: 6},
+            {no: 155, daire: "D-81", blok: "D", kat: "7.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D ŞEHİR-AVM", bahce: 0, m2: 76.32, birim: 79769.39, fiyat: 6088000, kira: 34800, sorunlar: ["Banyo Seramik Arka Boşluğu", "Led Trafo Topraklaması", "Genel Temizlik", "Çıta"], teslim: "12.08.2025", sorunSayisi: 4},
+            {no: 156, daire: "D-85", blok: "D", kat: "8.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-B DENİZ", bahce: 0, m2: 83.09, birim: 80503.07, fiyat: 6689000, kira: 38200, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "02.09.2025", sorunSayisi: 3},
+            {no: 157, daire: "D-86", blok: "D", kat: "8.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-B DENİZ", bahce: 0, m2: 76.32, birim: 79402.52, fiyat: 6060000, kira: 34600, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik"], teslim: "06.08.2025", sorunSayisi: 3},
+            {no: 158, daire: "D-92", blok: "D", kat: "8.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 83.09, birim: 79251.41, fiyat: 6585000, kira: 37600, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "09.10.2025"},
+            {no: 159, daire: "D-93", blok: "D", kat: "8.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D DENİZ", bahce: 0, m2: 76.32, birim: 79965.93, fiyat: 6103000, kira: 34900, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik", "Parke Çizikleri"], teslim: "06.08.2025", sorunSayisi: 4},
+            {no: 160, daire: "D-97", blok: "D", kat: "9.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-B DENİZ", bahce: 0, m2: 76.32, birim: 80503.14, fiyat: 6144000, kira: 35100, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Süpürgelik"], teslim: "06.08.2025", sorunSayisi: 3},
+            {no: 161, daire: "D-98", blok: "D", kat: "9.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-B DENİZ", bahce: 0, m2: 76.32, birim: 79782.49, fiyat: 6089000, kira: 34800, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025"},
+            {no: 162, daire: "D-104", blok: "D", kat: "9.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 79651.47, fiyat: 6079000, kira: 34700, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "15.08.2025"},
+            {no: 163, daire: "D-105", blok: "D", kat: "9.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D DENİZ", bahce: 0, m2: 76.32, birim: 80359.01, fiyat: 6133000, kira: 35000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "15.08.2025"},
+            {no: 164, daire: "D-110", blok: "D", kat: "10.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-B DENİZ", bahce: 0, m2: 83.26, birim: 82128.27, fiyat: 6838000, kira: 39100, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Cam Çizik/Kırık", "Süpürgelik"], teslim: "14.10.2025", sorunSayisi: 4},
+            {no: 165, daire: "D-116", blok: "D", kat: "10.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 81983.75, fiyat: 6257000, kira: 35800, sorunlar: []},
+            {no: 166, daire: "D-117", blok: "D", kat: "10.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D DENİZ", bahce: 0, m2: 83.07, birim: 82689.30, fiyat: 6869000, kira: 39300, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "15.08.2025"},
+            {no: 167, daire: "D-122", blok: "D", kat: "11.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-B DENİZ", bahce: 0, m2: 83.13, birim: 82521.35, fiyat: 6860000, kira: 39200, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "15.08.2025"},
+            {no: 168, daire: "D-128", blok: "D", kat: "11.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 82376.83, fiyat: 6287000, kira: 35900, sorunlar: ["Termostat", "Led Trafo Topraklaması", "Genel Temizlik", "Süpürgelik"], teslim: "15.08.2025", sorunSayisi: 4},
+            {no: 169, daire: "D-129", blok: "D", kat: "11.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D DENİZ", bahce: 0, m2: 83.07, birim: 83086.55, fiyat: 6902000, kira: 39400, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik"], teslim: "19.08.2025"},
+            {no: 170, daire: "D-133", blok: "D", kat: "12.NORMAL KAT", tip: "2+1 TİP I", cephe: "K-B DENİZ", bahce: 0, m2: 188.21, birim: 82694.86, fiyat: 15564000, kira: 86500, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Dış Kapı"], mutfak: "Açık", teslim: "30.09.2025", sorunSayisi: 3},
+            {no: 171, daire: "D-134", blok: "D", kat: "12.NORMAL KAT", tip: "2+1 TİP K", cephe: "K ŞEHİR", bahce: 0, m2: 133.95, birim: 82090.33, fiyat: 10996000, kira: 61100, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Merkezi Sistem", "Cam Çizik/Kırık", "Çıta", "Elektrik", "Su"], mutfak: "Kapalı", teslim: "09.09.2025", sorunSayisi: 7},
+            {no: 172, daire: "D-137", blok: "D", kat: "12.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 82573.38, fiyat: 6302000, kira: 36000, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Parke Çizikleri"], teslim: "02.09.2025", sorunSayisi: 3},
+            {no: 173, daire: "D-138", blok: "D", kat: "12.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D DENİZ", bahce: 0, m2: 76.32, birim: 83280.92, fiyat: 6356000, kira: 36300, sorunlar: ["Led Trafo Topraklaması", "Genel Temizlik", "Cam Çizik/Kırık", "Su"], teslim: "19.09.2025", sorunSayisi: 4},
+            {no: 174, daire: "D-140", blok: "D", kat: "12.NORMAL KAT", tip: "2+1 TİP L", cephe: "G DENİZ", bahce: 0, m2: 114.07, birim: 83439.99, fiyat: 9518000, kira: 54400, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik", "Merkezi Sistem", "Parke Çizikleri", "Elektrik", "Su", "Süpürgelik"], mutfak: "Açık", teslim: "24.09.2025", sorunSayisi: 8},
+            {no: 175, daire: "D-141", blok: "D", kat: "13.NORMAL KAT", tip: "2+1 TİP I", cephe: "K-B DENİZ", bahce: 0, m2: 174.12, birim: 82994.49, fiyat: 14451000, kira: 80300, sorunlar: ["Termostat", "Led Trafo Topraklaması", "Elektrik Pano", "Genel Temizlik", "Merkezi Sistem", "Cam Çizik/Kırık", "Dış Kapı", "Elektrik", "Su"], teslim: "19.09.2025", sorunSayisi: 9},
+            {no: 176, daire: "D-142", blok: "D", kat: "13.NORMAL KAT", tip: "2+1 TİP K", cephe: "K ŞEHİR", bahce: 0, m2: 133.61, birim: 82284.26, fiyat: 10994000, kira: 61100, sorunlar: ["Banyo Seramik Arka Boşluğu", "Led Trafo Topraklaması", "Elektrik Pano", "Genel Temizlik", "Merkezi Sistem", "Cam Çizik/Kırık", "Elektrik", "Su"], mutfak: "Kapalı", teslim: "19.09.2025", sorunSayisi: 8},
+            {no: 177, daire: "D-145", blok: "D", kat: "13.NORMAL KAT", tip: "1+1 TİP B", cephe: "K-D ŞEHİR", bahce: 0, m2: 76.32, birim: 82769.92, fiyat: 6317000, kira: 36100, sorunlar: ["Subasman", "Led Trafo Topraklaması", "Genel Temizlik", "Cam Çizik/Kırık", "Elektrik", "Su"], teslim: "19.09.2025", sorunSayisi: 6},
+            {no: 178, daire: "D-146", blok: "D", kat: "13.NORMAL KAT", tip: "1+1 TİP B", cephe: "G-D DENİZ", bahce: 0, m2: 76.32, birim: 83477.46, fiyat: 6371000, kira: 36400, sorunlar: ["Subasman", "Banyo Seramik Arka Boşluğu", "Led Trafo Topraklaması", "Elektrik Pano", "Genel Temizlik", "Merkezi Sistem"], teslim: "24.09.2025", sorunSayisi: 6}
+        ];
+
+        let filteredApartments = [...apartments];
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('tr-TR', {
+                style: 'currency',
+                currency: 'TRY',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(price);
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const noResults = document.getElementById('noResults');
+            
+            if (filteredApartments.length === 0) {
+                tbody.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            
+            tbody.innerHTML = filteredApartments.map(apt => `
+                <tr>
+                    <td>${apt.no}</td>
+                    <td><strong>${apt.daire}</strong></td>
+                    <td>${apt.blok}</td>
+                    <td>${apt.kat}</td>
+                    <td>${apt.tip}</td>
+                    <td>${apt.m2} m²</td>
+                    <td>${apt.cephe}</td>
+                    <td class="price">${formatPrice(apt.fiyat)}</td>
+                    <td class="price">${formatPrice(apt.kira)}</td>
+                    <td><button class="view-btn" onclick="showDetail(${apt.no})">Detay</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function applyFilters() {
+            const blockFilter = document.getElementById('blockFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const floorFilter = document.getElementById('floorFilter').value;
+            const priceFilter = document.getElementById('priceFilter').value;
+
+            filteredApartments = apartments.filter(apt => {
+                if (blockFilter && apt.blok !== blockFilter) return false;
+                if (typeFilter && !apt.tip.includes(typeFilter)) return false;
+                if (floorFilter && !apt.kat.includes(floorFilter)) return false;
+                
+                if (priceFilter) {
+                    const [min, max] = priceFilter.split('-').map(Number);
+                    if (apt.fiyat < min || apt.fiyat > max) return false;
+                }
+                
+                return true;
+            });
+
+            renderTable();
+            updateStats();
+        }
+
+        function searchApartment() {
+            const searchTerm = document.getElementById('searchInput').value.toUpperCase().trim();
+            
+            if (!searchTerm) {
+                filteredApartments = [...apartments];
+                renderTable();
+                updateStats();
+                return;
+            }
+
+            const found = apartments.find(apt => apt.daire === searchTerm);
+            
+            if (found) {
+                showDetail(found.no);
+            } else {
+                filteredApartments = apartments.filter(apt => 
+                    apt.daire.includes(searchTerm) || 
+                    apt.blok.includes(searchTerm)
+                );
+                renderTable();
+                updateStats();
+                
+                if (filteredApartments.length === 0) {
+                    alert('❌ Daire bulunamadı! Lütfen geçerli bir daire numarası girin (örn: A1-1, B-4, D-73)');
+                }
+            }
+        }
+
+        function showDetail(no) {
+            const apt = apartments.find(a => a.no === no);
+            const modal = document.getElementById('detailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.innerHTML = `🏠 ${apt.daire} - ${apt.tip}`;
+
+            let sorunBadge = '';
+            if (apt.sorunlar && apt.sorunlar.length > 0) {
+                const sorunSayisi = apt.sorunSayisi || apt.sorunlar.length;
+                if (sorunSayisi >= 10) {
+                    sorunBadge = `<span class="badge badge-danger">${sorunSayisi} Sorun</span>`;
+                } else if (sorunSayisi >= 5) {
+                    sorunBadge = `<span class="badge badge-warning">${sorunSayisi} Sorun</span>`;
+                } else {
+                    sorunBadge = `<span class="badge badge-success">${sorunSayisi} Sorun</span>`;
+                }
+            } else {
+                sorunBadge = `<span class="badge badge-success">Sorun Yok</span>`;
+            }
+
+            modalBody.innerHTML = `
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Blok</div>
+                        <div class="detail-value">${apt.blok}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Kat</div>
+                        <div class="detail-value">${apt.kat}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Daire Tipi</div>
+                        <div class="detail-value">${apt.tip}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Cephe Yönü</div>
+                        <div class="detail-value">${apt.cephe}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Brüt Alan</div>
+                        <div class="detail-value">${apt.m2} m²</div>
+                    </div>
+                    ${apt.bahce ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Bahçe Alanı</div>
+                        <div class="detail-value">${apt.bahce} m²</div>
+                    </div>
+                    ` : ''}
+                    ${apt.mutfak ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Mutfak Tipi</div>
+                        <div class="detail-value">${apt.mutfak}</div>
+                    </div>
+                    ` : ''}
+                    <div class="detail-item">
+                        <div class="detail-label">Birim Fiyat</div>
+                        <div class="detail-value">${formatPrice(apt.birim)}/m²</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">2025 Satış Fiyatı</div>
+                        <div class="detail-value price">${formatPrice(apt.fiyat)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Aylık Kira</div>
+                        <div class="detail-value price">${formatPrice(apt.kira)}/ay</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Amortisman Süresi</div>
+                        <div class="detail-value">15 Yıl</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Sorun Durumu</div>
+                        <div class="detail-value">${sorunBadge}</div>
+                    </div>
+                    ${apt.teslim ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Teslim Tarihi</div>
+                        <div class="detail-value">${apt.teslim}</div>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                ${apt.sorunlar && apt.sorunlar.length > 0 ? `
+                <div class="sorun-section">
+                    <h3>⚠️ Tespit Edilen Sorunlar (${apt.sorunlar.length} Adet)</h3>
+                    <ul class="sorun-list">
+                        ${apt.sorunlar.map(sorun => `<li>• ${sorun}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        function updateStats() {
+            const total = filteredApartments.length;
+            const totalValue = filteredApartments.reduce((sum, apt) => sum + apt.fiyat, 0);
+            const avgPrice = total > 0 ? totalValue / total : 0;
+            const avgRent = total > 0 ? filteredApartments.reduce((sum, apt) => sum + apt.kira, 0) / total : 0;
+
+            document.getElementById('totalApartments').textContent = total;
+            document.getElementById('totalValue').textContent = (totalValue / 1000000000).toFixed(2) + ' Milyar TL';
+            document.getElementById('avgPrice').textContent = (avgPrice / 1000000).toFixed(2) + ' M TL';
+            document.getElementById('avgRent').textContent = formatPrice(avgRent);
+        }
+
+        // Modal dışına tıklayınca kapat
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Enter tuşu ile arama
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchApartment();
+            }
+        });
+
+        // Sayfa yüklendiğinde tabloyu render et
+        renderTable();
+        updateStats();
+    </script>
+</body>
+</html>
